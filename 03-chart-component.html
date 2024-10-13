@@ -1,0 +1,73 @@
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>ArcGIS Maps SDK for JavaScript Tutorials: Display and create charts with charts-components & charts-model
+    </title>
+
+    <style>
+        .chart-container {
+            display: flex;
+            flex-direction: column;
+            height: 95vh;
+        }
+
+        #bar-chart,
+        #bar-chart-exercise {
+            flex: 1;
+        }
+    </style>
+    <!-- Load CSS, Chart Components and Chart Model from CDN -->
+    <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/dark/main.css" />
+    <script src="https://js.arcgis.com/4.30"></script>
+    <script type="module" src="https://js.arcgis.com/charts-components/4.30/arcgis-charts-components.esm.js"></script>
+    <script type="module" src="https://js.arcgis.com/charts-model/4.30/index.js"></script>
+</head>
+
+<body>
+    <div class="chart-container">
+        <h3 class="chart-title">Distribución parques infantiles por distrito</h3>
+        <arcgis-charts-bar-chart id="bar-chart"></arcgis-charts-bar-chart>
+
+        <h3 class="chart-title">Diferentes tipos de ejercicios</h3>
+        <arcgis-charts-bar-chart id="bar-chart-exercise"></arcgis-charts-bar-chart>
+    </div>
+
+    <script type="module">
+        const { BarChartModel } = await $arcgis.import("@arcgis/charts-model");
+
+
+        async function createFeatureLayer(url) {
+            const FeatureLayer = await $arcgis.import("esri/layers/FeatureLayer");
+            const featureLayer = new FeatureLayer({ url });
+            await featureLayer.load();
+            return featureLayer;
+        }
+
+        async function setupBarChart(chartElement, featureLayer, categoryField) {
+            if (!featureLayer) return;
+            
+            const barChartModel = new BarChartModel();
+            await barChartModel.setup({ layer: featureLayer });
+            await barChartModel.setCategory(categoryField);
+            barChartModel.setDataLabelsVisibility(true);
+
+            const barChartConfig = barChartModel.getConfig();
+            chartElement.config = barChartConfig;
+            chartElement.layer = featureLayer;
+        }
+
+        const parquesFL = await createFeatureLayer('https://services8.arcgis.com/aUMZBlBirRpjWPA0/arcgis/rest/services/InfluenciaZonasIdoneidadCotorras_WFL1/FeatureServer/2');
+        const barChartElement1 = document.querySelector("#bar-chart");
+        setupBarChart(barChartElement1, parquesFL, 'Distrito');
+
+
+        const areasActividadesFL = await createFeatureLayer('https://services8.arcgis.com/aUMZBlBirRpjWPA0/arcgis/rest/services/InfluenciaZonasIdoneidadCotorras_WFL1/FeatureServer/1');
+        const barChartElement2 = document.querySelector("#bar-chart-exercise");
+        setupBarChart(barChartElement2, areasActividadesFL, 'DESC_CLASIFICACION');
+
+    </script>
+</body>
+
+</html>
